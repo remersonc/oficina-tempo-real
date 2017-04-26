@@ -8,7 +8,24 @@
   </head>
 
   <body>
-    
+    <section>
+      <div class="container">
+        <div>
+          <video class="local" src="" autoplay loop></video>
+          <canvas class="local"></canvas>
+        </div>
+        <div>
+          <video class="remote" src="" autoplay loop></video>
+          <canvas class="remote"></canvas>
+        </div>
+      </div>
+
+      <div class="container">
+        <button>Connect</button>
+      </div>
+    </section>
+
+    <script src="/socket.io/socket.io.js"></script>
     <script src="/main.js"></script>
   </body>
 </html>
