@@ -35,13 +35,12 @@ socket.on('socket index', (index) => {
   }
 
   if(hasCamera) {
-    navigator.mediaDevices.getUserMedia({audio: true, video: true })
-    .then((stream) => {
-      pc.addStream(stream);
+    /*
 
-      localVideo.srcObject = stream;
-    })
-    .catch(console.warn);
+      - Requisitar acesso à câmera
+      - Adicionar stream ao srcObject do elemento de Vídeo local
+
+    */
   }
   else {
     const localStream = localCanvas.captureStream(25);
@@ -53,62 +52,44 @@ socket.on('socket index', (index) => {
 
 const pc = new RTCPeerConnection();
 
-const sendChannel = pc.createDataChannel('sendChannel');
+/*
+  Criar peer connection
+*/
 
-sendChannel.onopen = () => {
-  sendChannel.send('sending');
-}
+/*
+  - Capturar candidatos ICE
+  - Enviar candidatos para o servidor de sinalização
+*/
 
-sendChannel.onclose = () => console.log('[datachannel close]')
+/*
+  - Receber candidatos do servidor de sinalização
+  - Adicionar candidatos ICE
+*/
 
-pc.ondatachannel = (evt) => {
-  const receiveChannel = evt.channel;
-
-  receiveChannel.onmessage = (evt) => {
-    console.log(evt.data);
-  }
-}
-
-pc.onicecandidate = (evt) => {
-  if(evt.candidate !== null) {
-    socket.emit('enviar candidato', evt.candidate);
-  }
-}
-
-pc.onaddstream = (evt) => {
-  remoteVideo.srcObject = evt.stream;
-}
+/*
+  Adicionar handler para capturar adição de stream remoto
+*/
 
 const button = document.querySelector('button');
 button.onclick = connect;
 
 function connect() {
-  pc.createOffer()
-  .then((offer) => {
-    pc.setLocalDescription(offer);
-
-    socket.emit('enviar oferta', offer);
-  })
-  .catch(console.warn)
+  /*
+    - Criar oferta
+    - Definir oferta como descrição local
+    - Enviar oferta para servidor de sinalização
+  */
 }
 
-socket.on('receber oferta', (description) => {
-  pc.setRemoteDescription(description)
-  .then(() => pc.createAnswer())
-  .then((answer) => {
-    pc.setLocalDescription(answer);
+/*
+  - Receber oferta do servidor de sinalização
+  - Definir oferta como descrição remota
+  - Criar resposta
+  - Definir resposta como descrição local
+  - Enviar resposta para servidor de sinalização
+*/
 
-    socket.emit('enviar resposta', answer)
-  })
-  .catch(console.warn)
-});
-
-socket.on('receber resposta', (description) => {
-  pc.setRemoteDescription(description)
-  .catch(console.warn);
-});
-
-socket.on('receber candidato', (candidate) => {
-  pc.addIceCandidate(candidate)
-  .catch(console.warn);
-});
+/*
+  - Receber resposta do servidor de sinalização
+  - Definir resposta como descrição remota
+*/
